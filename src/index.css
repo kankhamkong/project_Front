@@ -1,0 +1,299 @@
+@import url('https://fonts.googleapis.com/css2?family=Krub:wght@200;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.login {
+    height: 700px;
+    width: 420px;
+    background: rgba(61, 56, 56, 0.542);
+    border-radius: 20px;
+    text-align: center;
+
+
+}
+
+.image {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    /* ให้ภาพไม่เกินขนาดของคอนเทนเนอร์ */
+    max-height: 100%;
+    /* ให้ภาพไม่เกินขนาดของคอนเทนเนอร์ */
+}
+
+.roto {
+    font-size: 30px;
+    position: absolute;
+    top: 32%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.username {
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 60px;
+    border: solid 1px  white;
+}
+
+.password {
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 20px;
+    border: solid 1px  white;
+}
+
+.top {
+    margin-top: 15px;
+}
+
+.ui {
+    margin-top: 10px;
+    color: white !important;
+    font-size: 14px;
+}
+
+.submit {
+    margin-top: 6px;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+}
+
+.line {
+    flex: 0.2;
+    height: 2px;
+    background-color: rgb(186, 186, 186);
+    /* สีของเส้นขีด */
+    /* margin: auto; */
+}
+
+.text {
+    padding: 2px;
+    /* ระยะห่างระหว่างข้อความและเส้น */
+    color: rgb(186, 186, 186);
+    font-size: 15px;
+}
+
+.iconlogin {
+    gap: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.bb {
+    margin-top: 10px;
+    text-decoration: underline;
+}
+
+.login1 {
+    height: 600px;
+    width: 420px;
+    background: rgba(61, 56, 56, 0.542);
+    border-radius: 20px;
+    text-align: center;
+    
+
+
+}
+
+.sing_up{
+    font-size: 27px;
+    position: fixed;
+    top: 180px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    
+}
+
+.usernamerg{
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 160px;
+    border: solid 1px  white;
+}
+
+.email{
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 2px;
+    border: solid 1px  white;
+}
+
+.passwordrg{
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 2px;  
+    border: solid 1px  white; 
+}
+
+.passwordrg1{
+    width: 300px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(74, 74, 74, 0.744);
+    color: white;
+    margin-top: 2px;  
+    border: solid 1px  white; 
+}
+
+.ct{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.manga{
+    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.image1{
+    border-radius: 5px;
+}
+
+.top{
+    font-size: 25px;
+    color: white;
+    margin-top: 1px;
+}
+
+.Search{
+    width: 350px;
+    height: 35px;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.744);
+    color: black;
+    border: solid 2px  rgb(67, 67, 67);
+}
+
+.Bar{
+    height: 607px;
+    width: 1300px;
+    background: rgba(61, 56, 56, 0.679);
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 70px;
+
+}
+
+.png{
+    margin-top: 50px;
+    position: relative;
+    left: 50px;
+}
+
+.Fairy{
+    color: white;
+    font-size: 40px;
+    position: relative;
+    right: 128px;
+    top: -240px
+    
+}
+
+.b{
+    color: white;
+    font-size: 25px;
+    position: relative;
+    right: 400px;
+    top: -200px
+}
+
+.bt1{
+    color: white;
+    font-size: 20px;
+    position: fixed;
+    right: 1099px;
+    top: 280px
+}
+
+.g{
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    color: white;
+    background-color: rgb(255, 199, 0);
+    position: relative;
+    right: -257px;
+    top: -146px
+}
+
+.btc{
+    position: relative;
+    right: 320px;
+    top: -134px
+}
+
+.R{
+    color: white;
+    font-size: 20px;
+    text-decoration: underline;
+    position: relative;
+    right: 590px;
+    top: -78px
+}
+.manga2{
+    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative; 
+    left:  100px;
+    top: -80px; 
+}
+
+.bookdi{
+    width: 1200px;
+    height: 500px;
+    background-color: rgba(240, 248, 255, 0.585);
+    border-radius: 10px;
+    font-size: 30px;
+}
+
+.manga{
+    height: 289px;
+    border-radius: 7px;
+
+    
+}
+
+.ac{
+margin-top: px;
+margin-right: 370px;
+}
+
+.tap {
+    height: 500px;
+    width: 1000px;
+    background: rgba(61, 56, 56, 0.542);
+    border-radius: 20px;
+}
+
+.tap2 {
+    height: 500px;
+    background: rgba(255, 255, 255, 0.729);
+    border-radius: 20px;
+}
