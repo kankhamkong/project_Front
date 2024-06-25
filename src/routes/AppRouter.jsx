@@ -9,7 +9,7 @@ import Books from '../layout/Books'
 import Wedtopee from '../layout/Wedtopee'
 import Profileuser from '../layout/Profileuser'
 import Pagbook from '../layout/Pagbook'
-import Subscription from '../layout/Subscription'
+import Market from '../layout/Market'
 
 
 const guestRouter = createBrowserRouter([
@@ -38,7 +38,7 @@ const userRouter = createBrowserRouter([
       { path: '/Wed', element: <Wedmanga/>},
       { path: '/topee/*', element: <Wedtopee/>},
       { path: '/profile', element: <Profileuser/>},
-      { path: '/sub', element: <Subscription/>}
+      { path: '/market', element: <Market/>}
 
       
      
@@ -62,7 +62,6 @@ const ADMINRouter = createBrowserRouter([
       { path: '/topee/*', element: <Wedtopee/>},
       { path: '/profile', element: <Profileuser/>},
       { path: '/pag', element: <Pagbook/>},
-      { path: '/sub', element: <Subscription/>}
       
     ]
   }

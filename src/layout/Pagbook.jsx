@@ -94,7 +94,7 @@ function Product({ product }) {
           {product.rate}
         </td>
         <td className="whitespace-nowrap overflow-hidden overflow-ellipsis">
-          <img className="max-h-[100px]" src={product.image} alt="" srcset="" />
+          <img className="max-h-[80px]" src={product.image} alt="" srcset="" />
         </td>
         <td>
           <button

@@ -43,7 +43,7 @@ export default function LoginForm() {
     >
       <div className="login">
         <img
-          src="Bear.png"
+          src="/fairytall/Bear.png"
           alt="Example Image"
           width="200"
           height="200"
