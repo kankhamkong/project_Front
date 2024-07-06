@@ -1,75 +1,108 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import cartAuth from "../hooks/cartAuth";
-import { Link } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import orderAuth from "../hooks/orderAuth";
+
 
 export default function Market() {
-  const { cart, hdlDelete, setCart, refreshCart, getApiCart,updateCart } = cartAuth();
+  const { cart, hdlDelete, updateCart } = cartAuth();
+  const { user } = useAuth();
+  const { setRefreshorder } = orderAuth();
+  const [groupedCart, setGroupedCart] = useState([]);
+  const navigate = useNavigate();
 
-  // const addToCart = (id) => {
-  //   const updatedCart = cart.map((item) => {
-  //     if (item.id === id) {
-  //       return { ...item, quantity: item.quantity + 1 };
-  //     }
-  //     return item;
-  //   });
-  //   setCart(updatedCart);
-  // };
-
-  const removeFromCart = (id) => {
-    const updatedCart = cart.map((item) => {
-      if (item.id === id) {
-        // ลดจำนวนสินค้าลง 1 หรือลบออกถ้าเป็น 0
-        const newQuantity = item.quantity > 0 ? item.quantity - 1 : 0;
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    });
-  
-    setCart(updatedCart);
-  };
-
-  // Function to calculate the total price of items in the cart
-  const calculateTotalPrice = () => {
-    return cart.reduce((total, item) => {
-      const price = parseFloat(item.book?.price) || 0;
-      return total + price * item.quantity;
-    }, 0);
-  };
-
+  // console.log(groupedCart)
   useEffect(() => {
-    // localStorage.setItem("cart", JSON.stringify(cart));
-    // let token = localStorage.getItem("token");
-    // const getApiCart = async () => {
-    //   try {
-    //     const rs = await axios.get("http://localhost:8889/cart/cart", {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     });
-    //     if (rs.status === 200) {
-    //       setCart(rs.data.cartItems);
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching cart:", error);
-    //   }
-    // };
-    getApiCart();
-  }, [refreshCart]);
+    // Group the cart items by book ID or title
+    const groupCartItems = () => {
+      const grouped = cart?.reduce((acc, item) => {
+        const existingItem = acc.find((el) => el.book.id === item.book.id);
+        if (existingItem) {
+          existingItem.quantity += item.quantity;
+        } else {
+          acc.push({ ...item });
+        }
+        return acc;
+      }, []);
+      // console.log(grouped);
+      setGroupedCart(grouped);
+    };
 
-  const groupByBookId = (cartItems) => {
-    return cartItems.reduce((acc, item) => {
-      const existingItem = acc.find((i) => i.book?.id === item.book?.id);
-      if (existingItem) {
-        existingItem.quantity += item.quantity;
-      } else {
-        acc.push({ ...item });
-      }
-      return acc;
-    }, []);
+    groupCartItems();
+  }, [cart]);
+
+  // console.log(cart)
+
+  // Function to calculate total price
+  const calculateTotalPrice = () => {
+    return groupedCart.reduce((total, item) => total + item.book.price * item.quantity, 0);
   };
 
-  const groupedCart = groupByBookId(cart);
+  // Function to increment quantity
+  const incrementQuantity = (id) => {
+    // const updatedCart = groupedCart.map((item) =>
+    //   item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+    // );
+    const filerCart = groupedCart.filter((item) => item.id === id);
+    const updatedCart = filerCart.find((item) => item.id === id).quantity+1; 
+    // console.log(updatedCart);
+    // setGroupedCart(updatedCart);
+    updateQuantity(id, updatedCart);
+  };
+
+  // console.log(groupedCart)
+  // console.log(updateCart)
+
+  // Function to decrement quantity
+  const decrementQuantity = async (id) => {
+    const updatedCart = groupedCart.map((item) =>
+      item.id === id && item.quantity > 0 ? { ...item, quantity: item.quantity - 1 } : item
+    );
+    // setGroupedCart(updatedCart);
+
+    // Check if the quantity becomes zero, then delete the item immediately
+    if (updatedCart.find((item) => item.id === id).quantity === 0) {
+      try {
+        await hdlDelete(id); // Assuming hdlDelete handles the API call to delete the item
+      } catch (error) {
+        console.error('Error deleting item:', error);
+      }
+    } else {
+      updateQuantity(id, updatedCart.find((item) => item.id === id).quantity);
+    }
+  };
+
+  // Function to update quantity directly
+  const updateQuantity = async (id, quantity) => {
+    try {
+      await updateCart(id, quantity); // Assuming updateCart handles the API call to update quantity
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  };
+
+  const hdlGopay = async () => {
+    try {
+      let token = localStorage.getItem('token');
+      const rs = await axios.post('http://localhost:8889/order/order', null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      console.log(rs)
+      if (rs.status === 200) {
+        console.log("add to Order");
+        navigate("/order");
+        setRefreshorder((prev) => !prev);
+      }
+    } catch (err) {
+      console.error("Error buying now:", err);
+      alert("เกิดข้อผิดพลาดในการเข้าชำระ!");
+    }
+  };
 
   return (
     <>
@@ -81,19 +114,19 @@ export default function Market() {
             <p className="text-lg">เลือกหนังสือที่ต้องการชำระเงิน</p>
           </div>
           <hr className="my-4" />
-          <div className="">
+          <div className="flex flex-col justify-between items-center">
             {groupedCart.length === 0 ? (
               <p className="text-5xl text-red-700 flex flex-col justify-center items-center">ไม่มีสินค้าในตระกร้า</p>
             ) : (
               <>
-                {groupedCart.map((el, index) => (
-                  <div key={index} className="border border-indigo-600 w-[40rem] h-[9rem] m-4 p-4 flex justify-between">
+                {groupedCart && groupedCart?.map((el, index) => (
+                  <div key={index} className="bg-gray-200 w-[40rem] h-[9rem] m-4 p-4 flex justify-between">
                     <div className="flex">
                       <div className="flex flex-col mr-4">
                         <div className="flex">
                           {el.book && el.book.image ? (
                             <img
-                              src={el.book.image}
+                              src={`${el.book.image}`}
                               width={70}
                               alt={el.book.title}
                               className="rounded"
@@ -109,13 +142,15 @@ export default function Market() {
                         <h1 className="text-xl font-bold">{el.book?.title || "No Title"}</h1>
                         <p className="text-md">เล่ม: {el.book?.volume || "N/A"}</p>
                         <p className="text-md">{el.book?.currency} {el.book?.price || "No Price"}</p>
-                        
                       </div>
                     </div>
+                    <div className="flex justify-between items-center">  
+                      <button className="m-2" onClick={() => incrementQuantity(el.id)}>เพิ่ม</button>
+                      <p className="">จำนวน: {el.quantity}</p> 
+                      <button className="m-2" onClick={() => decrementQuantity(el.id)}>ลด</button>
+                    </div>
                     <div className="flex justify-between ">
-                    <button className="m-2 " onClick={() => updateCart(el.id)}>เพิ่ม</button>
-                    <p className="flex justify-between items-center">จำนวน: {el.quantity}</p>
-                    <button className="m-2" onClick={() => removeFromCart(el.id)}>ลด</button>
+                    
                       <button className="m-2" onClick={() => hdlDelete(el.id)}>ลบ</button>
                     </div>
                   </div>
@@ -126,11 +161,13 @@ export default function Market() {
                     <button className="group-hover:underline group-hover:text-red-500">เลือกสินค้าเพิ่มในตะกร้า</button>
                   </Link>
                 </div>
-                <div className="border border-indigo-600 w-[40rem] h-[7rem] m-4 p-4 flex flex-col justify-center items-center">
+                <div className="bg-gray-200 w-[40rem] h-[7rem] m-4 p-4 flex flex-col justify-center items-center">
                   <p>Total Price: {calculateTotalPrice().toFixed(2)} THB</p>
                   <div className="flex m-1">
-                    <button className="text-white w-40 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-                      ชำระสินค้า
+                    <button 
+                      onClick={hdlGopay}
+                      className="text-white w-40 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                      ไปหน้าชำระเงิน
                     </button>
                   </div>
                 </div>

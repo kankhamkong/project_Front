@@ -2,11 +2,13 @@
 import axios from 'axios'
 import {createContext, useState, useEffect} from 'react'
 
+
 const AuthContext = createContext()
 
 function AuthContextProvider(props) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const[refresuser, setrefreshUser] = useState(false)
 
   useEffect( ()=>{
     const run = async () => {
@@ -25,7 +27,7 @@ function AuthContextProvider(props) {
       }   
     }
     run()
-  }, [])
+  }, [refresuser])
 
   const logout = () => {
     setUser(null)
@@ -33,7 +35,7 @@ function AuthContextProvider(props) {
   }
 
   return (
-    <AuthContext.Provider value={ {user, setUser, loading, logout} }>
+    <AuthContext.Provider value={ {user, setUser, loading, logout,setrefreshUser} }>
       {props.children}
     </AuthContext.Provider>
   )

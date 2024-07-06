@@ -1,56 +1,94 @@
-/* eslint-disable react/prop-types */
-import axios from 'axios'
-import {createContext, useState, useEffect} from 'react'
+import axios from "axios";
+import { createContext, useState, useEffect } from "react";
 
-const ProductContext = createContext()
+const ProductContext = createContext();
 
 function ProductContextProvider(props) {
-  const [product, setProduct] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshProduct, setRefreshProduct] = useState(false);
 
-  useEffect( ()=>{
-    const run = async () => {
+  useEffect(() => {
+    const fetchProducts = async () => {
       try {
-        setLoading(true)
-        let token = localStorage.getItem('token')
-        if(!token) { return }
-        const rs = await axios.get('http://localhost:8889/book/book', {
-          headers : { Authorization : `Bearer ${token}` }
-        })
-        setProduct(rs.data.Book)
-        // console.log(rs.data.Book)
-      }catch(err) {
-        console.log(err.message)
-      }finally {
-        setLoading(false)
-      }   
-    }
-    run()
-  }, [])
-
-  const addbook = async (input) => {
-        try {
-          setLoading(true)
-          let token = localStorage.getItem('token')
-          if(!token) { return }
-          const rs = await axios.post('http://localhost:8889/book/add', input, {
-            headers : { Authorization : `Bearer ${token}` }
-          })
-          setProduct(rs.data.Book)
-          console.log(rs.data.Book)
-        }catch(err) {
-          console.log(err.message)
-        }finally {
-          setLoading(false)
-        }   
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          return;
+        }
+        const response = await axios.get("http://localhost:8889/book/book", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProducts(response.data.Book);
+      } catch (err) {
+        console.log(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchProducts();
+  }, [refreshProduct]);
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.delete(`http://localhost:8889/book/book/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.status === 200) {
+        alert("Delete success");
+        setRefreshProduct(!refreshProduct);
+      }
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    }
+  };
+
+  const addBook = async (input) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+      const response = await axios.post("http://localhost:8889/book/add", input, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(response.data.Book);
+      setRefreshProduct(!refreshProduct);
+    } catch (err) {
+      console.log(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const Updetabook = async (input) => {
+    try{
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return;
+      }
+      const response = await axios.put(`http://localhost:8889/book/${input.id}`, input, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(response.data.Book);
+      setRefreshProduct(!refreshProduct);
+    }catch (err){
+      console.log(err.message);
+    }finally{
+      setLoading(false);
+    }
+  }
 
   return (
-    <ProductContext.Provider value={ {product,loading,addbook } }>
+    <ProductContext.Provider value={{ products, loading, addBook, handleDelete,setRefreshProduct,Updetabook }}>
       {props.children}
     </ProductContext.Provider>
-  )
+  );
 }
 
-export { ProductContextProvider }
-export default ProductContext
+export { ProductContextProvider };
+export default ProductContext;

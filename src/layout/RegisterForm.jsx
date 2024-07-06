@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function RegisterForm() {
   const navigate = useNavigate()
@@ -18,22 +19,35 @@ export default function RegisterForm() {
 
   const hdlSubmit = async e => {
     try {
-      e.preventDefault()
+      e.preventDefault();
       // validation
       if(input.password !== input.confirmPassword) {
-        return alert('Please check confirm password')
+        return Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Please check confirm password',
+        });
       }
-      const rs = await axios.post('http://localhost:8889/auth/register', input)
-      console.log(rs)
+      const rs = await axios.post('http://localhost:8889/auth/register', input);
+      console.log(rs);
       if(rs.status === 200) {
-        alert('Register Successful')
-        navigate('/')
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Register Successful',
+        }).then(() => {
+          navigate('/');
+        });
       }
-    }catch(err) {
-      console.log( err.message)
+    } catch(err) {
+      console.log(err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: err.message,
+      });
     }
-
-  }
+  };
 
   return (
     <div className="hero min-h-screen" style={{ backgroundImage: "url(bt.jpg)" }}>

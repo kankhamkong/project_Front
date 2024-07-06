@@ -63,7 +63,7 @@
 }
 
 .submit {
-    margin-top: 6px;
+    margin-top: 40px;
 }
 
 .container {
@@ -286,7 +286,7 @@ margin-right: 370px;
 }
 
 .tap {
-    height: 500px;
+    height: 600px;
     width: 1000px;
     background: rgba(61, 56, 56, 0.542);
     border-radius: 20px;
