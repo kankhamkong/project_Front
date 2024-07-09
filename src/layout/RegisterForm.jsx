@@ -57,7 +57,7 @@ export default function RegisterForm() {
       <form onSubmit={hdlSubmit} className="flex flex-col gap-6 items-center">
         <label >
           <input
-            className="usernamerg"
+            className="usernamerg px-2"
             type="text"
             placeholder='username'
             required
@@ -69,7 +69,7 @@ export default function RegisterForm() {
 
         <label>
           <input 
-            className="email"
+            className="email px-2"
             type="email"
             placeholder='email'
             required
@@ -81,7 +81,7 @@ export default function RegisterForm() {
 
         <label>
           <input
-            className="passwordrg"
+            className="passwordrg px-2"
             type="password"
             placeholder='password'
             required
@@ -92,7 +92,7 @@ export default function RegisterForm() {
         </label>
         <label>
           <input
-            className="passwordrg1"
+            className="passwordrg1 px-2"
             type="password"
             placeholder='confirmPassword'
             required

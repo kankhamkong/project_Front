@@ -141,7 +141,7 @@ export default function Wedtopee() {
   };
 
 
-  return (
+  return(
     <div className="relative min-h-screen flex justify-center items-center">
       {book && (
         <div
@@ -201,6 +201,9 @@ export default function Wedtopee() {
                     </button>}
                   </div>
                 </div>
+              </div>
+              <div className="self-start ml-[5rem] mt-5">
+                <h1 className="text-white text-xl">เล่มอื่นใน ซีรี่ย์</h1>
               </div>
               <div className="grid grid-cols-5 m-6 gap-3">
                 {bookOptions &&

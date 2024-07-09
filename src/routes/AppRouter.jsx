@@ -4,17 +4,17 @@ import RegisterForm from "../layout/RegisterForm";
 import useAuth from "../hooks/useAuth";
 import Header from "../layout/Header";
 import UserHome from "../layout/UserHome";
-import Books from "../layout/Books";
+import Addbooks from "../layout/Addbooks";
 import Wedtopee from "../layout/Wedtopee";
 import Profileuser from "../layout/Profileuser";
-import Pagbook from "../layout/Pagbook";
+import Removebook from "../layout/Removebook";
 import Market from "../layout/Market";
 import Order from "../layout/Order";
 import Historyuser from "../layout/Historyuser";
 import { PaymentContextProvider } from "../contexts/PaymentContext";
 import Historyadmin from "../layout/Historyadmin";
 import PageFound from "../layout/PageFound";
-import Updatebook from "../layout/Updatebook";
+import PublicPage from "../layout/PublicPage"; // เพิ่มหน้าใหม่ที่ทุกคนเข้าถึงได้
 
 const guestRouter = createBrowserRouter([
   {
@@ -26,13 +26,14 @@ const guestRouter = createBrowserRouter([
       </>
     ),
     children: [
-      { index: true, element: <LoginForm /> },
+      { index: true, element: <PublicPage /> }, // เปลี่ยนหน้าแรกเป็น PublicPage
+      { path: "/login", element: <LoginForm /> }, // เปลี่ยน path ของ LoginForm เป็น /login
       { path: "/register", element: <RegisterForm /> },
     ],
   },
   {
     path: '*',
-    element: <><PageFound />,</>
+    element: <PageFound />,
   }
 ]);
 
@@ -47,7 +48,7 @@ const userRouter = createBrowserRouter([
     ),
     children: [
       { index: true, element: <UserHome /> },
-      { path: "/topee/*", element: <Wedtopee /> },
+      { path: "/topee/", element: <Wedtopee/> },
       { path: "/profile", element: <Profileuser /> },
       { path: "/market", element: <Market /> },
       {
@@ -70,7 +71,7 @@ const userRouter = createBrowserRouter([
   },
   {
     path: '*',
-    element: <><PageFound />,</>
+    element: <PageFound />,
   }
 ]);
 
@@ -85,21 +86,18 @@ const ADMINRouter = createBrowserRouter([
     ),
     children: [
       { index: true, element: <UserHome /> },
-      { path: "/Book", element: <Books /> },
-      { path: "/topee/*", element: <Wedtopee /> },
+      { path: "/addbook", element: <Addbooks/> },
+      { path: "/topee/*", element: <Wedtopee/> },
       { path: "/profile", element: <Profileuser /> },
-      { path: "/pag", element: <Pagbook /> },
-      {path: "/historyadmin", element: <Historyadmin/> },
-      {path: "/updatebook", element: <Updatebook/> },
+      { path: "/remove", element: <Removebook /> },
+      { path: "/historyadmin", element: <Historyadmin /> },
     ],
   },
   {
     path: '*',
-    element: <><PageFound />,</>
+    element: <PageFound />,
   }
 ]);
-
-
 
 export default function AppRouter() {
 

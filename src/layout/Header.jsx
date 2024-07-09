@@ -10,12 +10,14 @@ import useAuth from "../hooks/useAuth";
 import cartAuth from "../hooks/cartAuth";
 import ProductContext from "../contexts/ProductContext";
 
-const userNav = [{ to: "/", text: "Home" }];
+const userNav = [
+  { to: "/", text: "Home" },
+];
 
 const adminNav = [
   { to: "/", text: "Home" },
-  { to: "/Book", text: "Book" },
-  { to: "/pag", text: "PagBook" },
+  { to: "/addbook", text: "AddBook" },
+  { to: "/remove", text: "Book" },
   { to: "/historyadmin", text: "HistoryOrder" },
 ];
 
@@ -89,7 +91,7 @@ export default function Header() {
   );
 
   const totalQuantity = cart?.reduce((acc, item) => acc + item.quantity, 0);
-
+  
   return (
     <div
       className={`w-full top-0 fixed z-40 transition duration-500 ${
@@ -171,7 +173,7 @@ export default function Header() {
                       {user.username}
                     </button>
                     {showUserMenu && (
-                      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-[#3e1e1e] text-white rounded-lg shadow-lg z-50 w-48 my-[-15rem]">
+                      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-[#3e1e1e] text-white rounded-lg shadow-lg z-50 w-48 my-[-13rem]">
                         <Link
                           to="/profile"
                           className=" px-4 py-2 hover:bg-[#522929] flex flex-col justify-center items-center"

@@ -80,7 +80,7 @@ function Product({ product, handleDelete }) {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "คุณลบหนังสือนี้แล้ว",
+      confirmButtonText: "ลบหนังสือนี้",
     }).then((result) => {
       if (result.isConfirmed) {
         handleDelete(product.id);

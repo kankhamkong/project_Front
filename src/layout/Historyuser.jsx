@@ -80,7 +80,7 @@ export default function HistoryUser() {
               ))}
           </ul>
         ) : (
-          <p className="text-xl">ไม่มีประวัติการชำระเงิน</p>
+          <p className="text-xl text-white">ไม่มีประวัติการชำระเงิน</p>
         )}
       </div>
     </div>
