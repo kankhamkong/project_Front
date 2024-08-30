@@ -37,7 +37,7 @@ function ProductContextProvider(props) {
       });
       if (response.status === 200) {
         alert("Delete success");
-        setRefreshProduct(!refreshProduct);
+        setRefreshProduct((prev) => !prev);
       }
     } catch (err) {
       console.log(err);
@@ -56,7 +56,7 @@ function ProductContextProvider(props) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.Book);
-      setRefreshProduct(!refreshProduct);
+      setRefreshProduct((prev) => !prev);
     } catch (err) {
       console.log(err.message);
     } finally {
@@ -66,7 +66,6 @@ function ProductContextProvider(props) {
 
   const Updetabook = async (input) => {
     try{
-      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
         return;
@@ -74,12 +73,11 @@ function ProductContextProvider(props) {
       const response = await axios.put(`http://localhost:8889/book/${input.id}`, input, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(response.data.Book);
-      setRefreshProduct(!refreshProduct);
+      // setProducts(response.data.Book);
+      setRefreshProduct((prev) => !prev);
+      console.log(refreshProduct)
     }catch (err){
       console.log(err.message);
-    }finally{
-      setLoading(false);
     }
   }
 

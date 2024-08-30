@@ -48,7 +48,7 @@ export default function LoginForm() {
   return (
     <div
       className="hero min-h-screen"
-      style={{ backgroundImage: "url(bt.jpg)" }}
+      style={{ backgroundImage: "url(img/bt.jpg)" }}
     >
       <div className="login">
         <img

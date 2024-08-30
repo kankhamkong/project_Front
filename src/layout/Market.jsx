@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import cartAuth from "../hooks/cartAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import orderAuth from "../hooks/orderAuth";
+import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 
 
 export default function Market() {
@@ -14,9 +16,7 @@ export default function Market() {
   const [groupedCart, setGroupedCart] = useState([]);
   const navigate = useNavigate();
 
-  // console.log(groupedCart)
   useEffect(() => {
-    // Group the cart items by book ID or title
     const groupCartItems = () => {
       const grouped = cart?.reduce((acc, item) => {
         const existingItem = acc.find((el) => el.book.id === item.book.id);
@@ -27,7 +27,6 @@ export default function Market() {
         }
         return acc;
       }, []);
-      // console.log(grouped);
       setGroupedCart(grouped);
     };
 
@@ -43,13 +42,8 @@ export default function Market() {
 
   // Function to increment quantity
   const incrementQuantity = (id) => {
-    // const updatedCart = groupedCart.map((item) =>
-    //   item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    // );
     const filerCart = groupedCart.filter((item) => item.id === id);
     const updatedCart = filerCart.find((item) => item.id === id).quantity+1; 
-    // console.log(updatedCart);
-    // setGroupedCart(updatedCart);
     updateQuantity(id, updatedCart);
   };
 
@@ -61,9 +55,6 @@ export default function Market() {
     const updatedCart = groupedCart.map((item) =>
       item.id === id && item.quantity > 0 ? { ...item, quantity: item.quantity - 1 } : item
     );
-    // setGroupedCart(updatedCart);
-
-    // Check if the quantity becomes zero, then delete the item immediately
     if (updatedCart.find((item) => item.id === id).quantity === 0) {
       try {
         await hdlDelete(id); // Assuming hdlDelete handles the API call to delete the item
@@ -78,7 +69,7 @@ export default function Market() {
   // Function to update quantity directly
   const updateQuantity = async (id, quantity) => {
     try {
-      await updateCart(id, quantity); // Assuming updateCart handles the API call to update quantity
+      await updateCart(id, quantity); 
     } catch (error) {
       console.error('Error updating quantity:', error);
     }
@@ -145,13 +136,13 @@ export default function Market() {
                       </div>
                     </div>
                     <div className="flex justify-between items-center">  
-                      <button className="m-2" onClick={() => incrementQuantity(el.id)}>เพิ่ม</button>
+                      <button className="m-2 bg-green-500 h-[2rem] w-[3rem] rounded-lg text-white" onClick={() => incrementQuantity(el.id)}>เพิ่ม</button>
                       <p className="">จำนวน: {el.quantity}</p> 
-                      <button className="m-2" onClick={() => decrementQuantity(el.id)}>ลด</button>
+                      <button className="m-2  bg-red-500 h-[2rem] w-[3rem] rounded-lg text-white" onClick={() => decrementQuantity(el.id)}>ลด</button>
                     </div>
-                    <div className="flex justify-between ">
-                    
-                      <button className="m-2" onClick={() => hdlDelete(el.id)}>ลบ</button>
+                    <div className="flex justify-between items-center ">
+                    <Link><FontAwesomeIcon icon={faTrash}  />
+                      <button className="m-2" onClick={() => hdlDelete(el.id)}>ลบ</button></Link>
                     </div>
                   </div>
                 ))}
@@ -162,7 +153,7 @@ export default function Market() {
                   </Link>
                 </div>
                 <div className="bg-gray-200 w-[40rem] h-[7rem] m-4 p-4 flex flex-col justify-center items-center">
-                  <p>Total Price: {calculateTotalPrice().toFixed(2)} THB</p>
+                  <p>จำนวนเงินทั้งสิ้น : {calculateTotalPrice().toFixed(2)} THB</p>
                   <div className="flex m-1">
                     <button 
                       onClick={hdlGopay}

@@ -49,39 +49,10 @@ const OrderContextProvider = ({ children }) => {
       }
     };
 
-    const hdlDelete = async (id) => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.delete(`http://localhost:8889/order/order/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.status === 200) { // Changed from statusCode to status
-          Swal.fire({
-            title: 'ยกเลิกการชำระ',
-            text: 'ยกเลิกการชำระเงินเรียบร้อยแล้ว',
-            icon: 'success',
-            confirmButtonText: 'ตกลง',
-          }).then(() => {
-            // Update the cart state after successful deletion
-            const updatedCart = order.filter((item) => item.id !== id); // Changed from cart to order
-            setOrder(updatedCart);
-          });
-          setRefreshorder(!refreshorder);
-        }
-      } catch (error) {
-        Swal.fire({
-          title: 'เกิดข้อผิดพลาด',
-          text: error.message,
-          icon: 'error',
-          confirmButtonText: 'ตกลง',
-        });
-      }
-    };
+   
 
   return (
-    <OrderContext.Provider value={{ order, addToOrder, hdlDelete, orderDetail,setRefreshorder, setOrder, setOrderDetail}}>
+    <OrderContext.Provider value={{ order, addToOrder, orderDetail,setRefreshorder, setOrder, setOrderDetail}}>
       {children}
     </OrderContext.Provider>
   );

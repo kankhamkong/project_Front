@@ -12,7 +12,7 @@ import cartAuth from "../hooks/cartAuth";
 
 export default function Order() {
   const { order, orderDetail, setOrder, setOrderDetail } = orderAuth();
-  const { createPayment, cancelPayment } = paymentAuth();
+  const { createPayment,  } = paymentAuth();
   const [paymentMethod, setPaymentMethodState] = useState("");
   const navigate = useNavigate();
   const { setRefreshPayment } = paymentAuth();
@@ -21,11 +21,14 @@ export default function Order() {
   const [form, setForm] = useState({
     realname: "",
     surname: "",
-    address: "",
+    houseNumber: "",
+    district: "",
+    province: "",
+    postalCode: "",
   });
 
   useEffect(() => {
-    // Handle any side effects when order changes
+
   }, [order]);
 
   const totalQuantity = orderDetail.reduce(
@@ -63,7 +66,9 @@ export default function Order() {
         orderId: order.id,
         totalAmount: order.total_price,
         method: paymentMethod,
-        ...form, // Add form data to the payment data
+        address: `${form.houseNumber}, ${form.district}, ${form.province} ${form.postalCode}`, // Concatenate the address fields
+        realname: form.realname,
+        surname: form.surname,
       };
       console.log(paymentData);
       await createPayment(paymentData);
@@ -92,39 +97,43 @@ export default function Order() {
     }
   };
 
-  const handleCancelPayment = async () => {
-    try {
-      const paymentData = {
-        totalQuantity: totalQuantity,
-        orderId: order.id,
-        totalAmount: order.total_price,
-        method: paymentMethod,
-      };
-      await cancelPayment(paymentData);
-      // Success message
-      Swal.fire({
-        title: "สำเร็จ!",
-        text: "ยกเลิกการชำระสินค้าเสร็จสิ้น",
-        icon: "success",
-        confirmButtonText: "ตกลง",
-      });
-      // Navigate to /history after successful cancellation
-      navigate("/history");
-      setRefreshPayment((prev) => !prev);
-      setRefreshCart((prev) => !prev);
-    } catch (error) {
-      console.error("Cancellation failed", error);
-      // Error message
-      Swal.fire({
-        title: "ล้มเหลว",
-        text: "ยกเลิกการชำระสินค้าล้มเหลว",
-        icon: "error",
-        confirmButtonText: "ลองอีกครั้ง",
-      });
-    }
-  };
+  // const handleCancelPayment = async () => {
+  //   try {
+  //     const paymentData = {
+  //       totalQuantity: totalQuantity,
+  //       orderId: order.id,
+  //       totalAmount: order.total_price,
+  //       method: paymentMethod,
+  //       address: `${form.houseNumber}, ${form.district}, ${form.province} ${form.postalCode}`, // Concatenate the address fields
+  //       realname: form.realname,
+  //       surname: form.surname,
+  //     };
+      
+  //     await cancelPayment(paymentData);
+  //     // Success message
+  //     Swal.fire({
+  //       title: "สำเร็จ!",
+  //       text: "ยกเลิกการชำระสินค้าเสร็จสิ้น",
+  //       icon: "success",
+  //       confirmButtonText: "ตกลง",
+  //     });
+  //     // Navigate to /history after successful cancellation
+  //     navigate("/history");
+  //     setRefreshPayment((prev) => !prev);
+  //     setRefreshCart((prev) => !prev);
+  //   } catch (error) {
+  //     console.error("Cancellation failed", error);
+  //     // Error message
+  //     Swal.fire({
+  //       title: "ล้มเหลว",
+  //       text: "ยกเลิกการชำระสินค้าล้มเหลว",
+  //       icon: "error",
+  //       confirmButtonText: "ลองอีกครั้ง",
+  //     });
+  //   }
+  // };
 
-  const isFormValid = form.realname && form.surname && form.address && paymentMethod;
+  const isFormValid = form.realname && form.surname && form.houseNumber && form.district && form.province && form.postalCode && paymentMethod;
 
   return (
     <div className="max-w-[100rem] bg-white flex justify-center items-center">
@@ -138,7 +147,7 @@ export default function Order() {
               <p>ไม่มีสินค้าในตระกร้า</p> /* No items in the cart */
             ) : (
               <div className="grid grid-cols-2 gap-5 w-full">
-                <div className="w-[25rem] border rounded-lg p-3">
+                <div className="w-[25rem] bg-[#ffffff] border rounded-lg p-3">
                   <h1 className="text-2xl">เลือกวิธีการชำระเงิน</h1>
                   <div>
                     <div className="flex gap-2 border-[1px] p-2 rounded-lg border-dark-blue mt-2">
@@ -209,10 +218,34 @@ export default function Order() {
                       />
                       <input
                         type="text"
-                        name="address"
-                        value={form.address}
+                        name="houseNumber"
+                        value={form.houseNumber}
                         onChange={handleInputChange}
-                        placeholder="ที่อยู่"
+                        placeholder="บ้านเลขที่"
+                        className="border p-2 mb-2 rounded w-full"
+                      />
+                      <input
+                        type="text"
+                        name="district"
+                        value={form.district}
+                        onChange={handleInputChange}
+                        placeholder="ตำบล/อำเภอ"
+                        className="border p-2 mb-2 rounded w-full"
+                      />
+                      <input
+                        type="text"
+                        name="province"
+                        value={form.province}
+                        onChange={handleInputChange}
+                        placeholder="จังหวัด"
+                        className="border p-2 mb-2 rounded w-full"
+                      />
+                      <input
+                        type="text"
+                        name="postalCode"
+                        value={form.postalCode}
+                        onChange={handleInputChange}
+                        placeholder="รหัสไปรษณีย์"
                         className="border p-2 mb-2 rounded w-full"
                       />
                     </div>
@@ -252,7 +285,7 @@ export default function Order() {
                         ชำระเงิน
                       </button>
                     </div>
-                    <div className="w-full flex justify-center">
+                    {/* <div className="w-full flex justify-center">
                       <button
                         className="bg-[#F24444] w-1/2 py-1.5 rounded-full text-white disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={handleCancelPayment}
@@ -260,7 +293,7 @@ export default function Order() {
                       >
                         ยกเลิกการชำระ
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

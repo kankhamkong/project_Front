@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
-import productAuth from "../hooks/productAuth";
+import React from 'react';
+import productAuth from '../hooks/productAuth';
 import { Link } from "react-router-dom";
 
-export default function UserHome() {
+export default function TypeUser() {
   const { products, setRefreshProduct } = productAuth();
 
   const filterUniqueProducts = (products) => {
@@ -23,16 +23,6 @@ export default function UserHome() {
 
   return (
     <div className="bg-[#592828] min-h-screen pt-24 p-2 text-white text-2xl">
-      <div className="flex items-center justify-center">
-        <h1 className="m-4 inline-block">การ์ตูนที่ลงล่าสุด</h1>
-        <hr className="border-white h-px flex-grow ml-4" />
-      </div>
-      {/* Display all products without filtering */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mx-auto">
-        {products?.map((item) => (
-          <HomeProduct key={item.id} product={item} />
-        ))}
-      </div>
       <div className="flex items-center justify-center">
         <h1 className="m-4 inline-block">แอ็คชั่น</h1>
         <hr className="border-white h-px flex-grow ml-4" />

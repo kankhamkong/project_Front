@@ -6,21 +6,39 @@ import { OrderContextProvider } from "./contexts/OrderContext";
 import { ProductContextProvider } from "./contexts/ProductContext"; // Import ProductContextProvider
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PaymentContextProvider } from "./contexts/PaymentContext";
+import { ProfileContextProvider } from "./contexts/ProfileContext";
+import { AddressContextProvider } from "./contexts/AddressContext";
+import { UsersContextProvider } from "./contexts/UsersContext";
 
 function App() {
   const { loading } = useAuth();
 
   if (loading) {
-    return <p className="text-4xl text-primary">Loading..</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg">Load...</span>;
+      </div>
+    );
   }
 
   return (
     <CartContextProvider>
       <OrderContextProvider>
-        <ProductContextProvider> {/* Wrap ProductContextProvider */}
+        <UsersContextProvider>
+        <AddressContextProvider>
+        <PaymentContextProvider>
+        <ProfileContextProvider>
+        <ProductContextProvider>
+          {" "}
+          {/* Wrap ProductContextProvider */}
           <ToastContainer />
           <AppRouter />
         </ProductContextProvider>
+        </ProfileContextProvider>
+        </PaymentContextProvider>
+        </AddressContextProvider>
+        </UsersContextProvider>
       </OrderContextProvider>
     </CartContextProvider>
   );

@@ -15,6 +15,13 @@ import { PaymentContextProvider } from "../contexts/PaymentContext";
 import Historyadmin from "../layout/Historyadmin";
 import PageFound from "../layout/PageFound";
 import PublicPage from "../layout/PublicPage"; // เพิ่มหน้าใหม่ที่ทุกคนเข้าถึงได้
+import TypeUser from "../layout/TypeUser";
+import Regsiterdelovery from "../layout/Regsiterdelovery";
+import Bookauthor from "../layout/Bookauthor";
+import AddressForm from "../layout/AddressForm";
+import Usersadmin from "../layout/Usersadmin";
+
+
 
 const guestRouter = createBrowserRouter([
   {
@@ -48,11 +55,14 @@ const userRouter = createBrowserRouter([
     ),
     children: [
       { index: true, element: <UserHome /> },
-      { path: "/topee/", element: <Wedtopee/> },
+      { path: "/topee/*", element: <Wedtopee/> },
+      { path: "/bookauthor", element: <Bookauthor/>},
       { path: "/profile", element: <Profileuser /> },
+      { path: "/type", element: <TypeUser/>},
       { path: "/market", element: <Market /> },
+      { path: "/address", element: <AddressForm/>},
       {
-        path: "/order",
+        path: "/order/*",
         element: (
           <PaymentContextProvider>
             <Order />
@@ -90,7 +100,30 @@ const ADMINRouter = createBrowserRouter([
       { path: "/topee/*", element: <Wedtopee/> },
       { path: "/profile", element: <Profileuser /> },
       { path: "/remove", element: <Removebook /> },
-      { path: "/historyadmin", element: <Historyadmin /> },
+      { path: "/users", element: <Usersadmin/>},
+      // { path: "/historyadmin", element: <Historyadmin /> },
+      { path: "/registerdelovery", element: <Regsiterdelovery/>},
+      { path: "/bookauthor", element: <Bookauthor/>},
+    ],
+  },
+  {
+    path: '*',
+    element: <PageFound />,
+  }
+]);
+
+const DeliveryRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <>
+        <Header />
+        <Outlet />
+      </>
+    ),
+    children: [
+      { index: true, element: <Historyadmin/> },
+      { path: "/profile", element: <Profileuser/> },
     ],
   },
   {
@@ -106,6 +139,8 @@ export default function AppRouter() {
   const finalRouter = user?.id
     ? user.role === "ADMIN"
       ? ADMINRouter
+      : user.role === "DELIVERY"
+      ? DeliveryRouter
       : userRouter
     : guestRouter;
   console.log(finalRouter)

@@ -48,13 +48,39 @@ export default function Wedtopee() {
     fetchBookOptions();
   }, [id]);
 
-  console.log(bookOptions);
+  const updateBookStock = async (bookId, newStock) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8889/book/${bookId}`,
+        { stock: newStock },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating book stock:", error);
+      toast.error("เกิดข้อผิดพลาดในการอัปเดตสต็อกสินค้า!", {
+        position: "top-center",
+      });
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!book) {
       console.error("Book data not loaded yet");
       return;
     }
+
+    if (book.stock <= 0) {
+      toast.error("สินค้าหมดแล้ว!", { position: "top-center" });
+      return;
+    }
+
+    if (book.stock <= 3) {
+      toast.warning("สินค้าใกล้จะหมดแล้ว!", { position: "top-center" });
+    }
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -74,10 +100,18 @@ export default function Wedtopee() {
           position: "top-center",
         });
         setRefreshCart((prev) => !prev);
-      }
+        updateCart(book?.id, 1);
 
-      console.log("Added to cart:", { quantity: 1 });
-      updateCart(book?.id, 1);
+        // Update stock count locally
+        const newStock = book.stock - 1;
+        setBook((prevBook) => ({
+          ...prevBook,
+          stock: newStock,
+        }));
+
+        // Update stock count on server
+        await updateBookStock(book.id, newStock);
+      }
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast.error("เกิดข้อผิดพลาดในการเพิ่มลงในตระกร้า!", {
@@ -93,6 +127,13 @@ export default function Wedtopee() {
       return;
     }
 
+    if (book.stock <= 1) {
+      toast.error("ไม่สามารถซื้อสินค้าได้ เพราะสินค้าเหลือเพียงชิ้นเดียว!", {
+        position: "top-center",
+      });
+      return;
+    }
+
     const createCart = {
       bookId: book?.id,
       amount: book?.price,
@@ -102,7 +143,7 @@ export default function Wedtopee() {
     try {
       const token = localStorage.getItem("token");
       const rs = await axios.post(
-        "http://localhost:8889/cart/cart",
+        `http://localhost:8889/cart/cart`,
         createCart,
         {
           headers: {
@@ -111,23 +152,34 @@ export default function Wedtopee() {
         }
       );
       if (rs.status === 200) {
-        console.log(rs.data)
+        console.log(rs.data);
         try {
-          const rs1 = await axios.post('http://localhost:8889/order/order', null, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
+          const rs1 = await axios.post(
+            "http://localhost:8889/order/order",
+            null,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           if (rs1.status === 200) {
-            // console.log("add to Order");
-            console.log(rs1)
             navigate("/order");
             setRefreshorder((prev) => !prev);
-            console.log("Added to cart:", { quantity: 1 });
             setRefreshCart((prev) => !prev);
             updateCart(book?.id, 1);
+
+            // Update stock count locally
+            const newStock = book.stock - 1;
+            setBook((prevBook) => ({
+              ...prevBook,
+              stock: newStock,
+            }));
+
+            // Update stock count on server
+            await updateBookStock(book.id, newStock);
           }
-        }catch (err) {
+        } catch (err) {
           console.log("Error:", err);
           alert("เกิดข้อผิดพลาดปุ่มซื้อ ");
         }
@@ -140,8 +192,7 @@ export default function Wedtopee() {
     }
   };
 
-
-  return(
+  return (
     <div className="relative min-h-screen flex justify-center items-center">
       {book && (
         <div
@@ -183,47 +234,72 @@ export default function Wedtopee() {
                   <label className="block text-white text-xl">
                     Category: {book.category}
                   </label>
-                  <label className="block text-white text-xl ">
+                  <label className="">
                     {book.rate}
                   </label>
-                  <div>
-                  {user?.role !== "ADMIN"&&<button
-                      onClick={handleAddToCart}
-                      className="text-white w-50 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                    >
-                      เพิ่มลงในตระกร้า
-                    </button>}
-                    {user?.role !== "ADMIN"&&<button
-                      onClick={handleBuyNow}
-                      className="text-white w-20 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 "
-                    >
-                      ซื้อ
-                    </button>}
-                  </div>
+                  <label className="block text-white text-xl"></label>
+                  จำนวนสินค้า: {book.stock}
+                  {book.stock === 0 ? (
+                    <p className="text-red-500 font-bold">สินค้าหมดแล้ว!</p>
+                  ) : (
+                    <div>
+                      {user?.role !== "ADMIN" && (
+                        <button
+                          onClick={handleAddToCart}
+                          disabled={book.stock === 0}
+                          className={`text-white w-50 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-3 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 ${
+                            book.stock === 0 ? "cursor-not-allowed opacity-50" : ""
+                          }`}
+                        >
+                          เพิ่มลงในตระกร้า
+                        </button>
+                      )}
+                      {user?.role !== "ADMIN" && (
+                        <button
+                          onClick={handleBuyNow}
+                          disabled={book.stock === 0}
+                          className={`text-white w-20 h-30 bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center ml-0 mt-5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 ${
+                            book.stock === 0 ? "cursor-not-allowed opacity-50" : ""
+                          }`}
+                        >
+                          ซื้อ
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="self-start ml-[5rem] mt-5">
                 <h1 className="text-white text-xl">เล่มอื่นใน ซีรี่ย์</h1>
               </div>
-              <div className="grid grid-cols-5 m-6 gap-3">
-                {bookOptions &&
-                  bookOptions.map((el, index) => (
-                    <div key={index} onClick={()=>navigate(`/topee/${el.id}`)}>
-                      <img
-                        className="rounded-md shadow-md"
-                        src={`${el.image}`}
-                        width={150}
-                        alt=""
-                      />
+              <div className="mt-5 flex flex-wrap gap-4 justify-center">
+                {bookOptions.map((el) => (
+                  <div
+                    key={el.id}
+                    onClick={() => navigate(`/wedtopee/${el.id}`)}
+                    className="tap cursor-pointer flex flex-col items-center"
+                  >
+                    <img
+                      src={el.image}
+                      alt={el.title}
+                      className="rounded-md shadow-md"
+                      style={{ width: "150px", height: "150px" }}
+                    />
+                    <div className="mt-2 text-center">
+                      <h2 className="text-white text-md">{el.title}</h2>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <p className="text-white">ไม่พบข้อมูล</p>
+            <p className="text-white text-xl text-center">
+              ไม่พบข้อมูล
+            </p>
           )}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

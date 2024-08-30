@@ -4,24 +4,29 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCartShopping,
   faMagnifyingGlass,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import useAuth from "../hooks/useAuth";
 import cartAuth from "../hooks/cartAuth";
 import ProductContext from "../contexts/ProductContext";
+import { text } from "@fortawesome/fontawesome-svg-core";
 
 const userNav = [
   { to: "/", text: "Home" },
+  { to: "/type", text: "TYPE" },
 ];
+
+const DeliveryNav = [{ to: "/", text: "Home" }];
 
 const adminNav = [
   { to: "/", text: "Home" },
   { to: "/addbook", text: "AddBook" },
   { to: "/remove", text: "Book" },
-  { to: "/historyadmin", text: "HistoryOrder" },
+  // { to: "/historyadmin", text: "HistoryOrder" },
+  { to: "/registerdelovery", text: "registerdelovery" },
+  {to: "/users", text: "Users" },
 ];
 
-const guestNav = [{ to: "/", text: "Home" }];
+const guestNav = [ { to: "/historyadmin", text: "HistoryOrder" },];
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,6 +43,8 @@ export default function Header() {
   const finalNav = user?.id
     ? user.role === "ADMIN"
       ? adminNav
+      : user.role === "DELIVERY"
+      ? DeliveryNav
       : userNav
     : guestNav;
 
@@ -91,7 +98,7 @@ export default function Header() {
   );
 
   const totalQuantity = cart?.reduce((acc, item) => acc + item.quantity, 0);
-  
+
   return (
     <div
       className={`w-full top-0 fixed z-40 transition duration-500 ${
@@ -106,24 +113,41 @@ export default function Header() {
             alt="logo"
             onClick={() => navigate(`/`)}
           />
-
+          {user?.role !== "ADMIN" && user?.role !== "User" && (
+            <Link>
+              <h1 className=" text-3xl font-bold my-8 text-white">Delivery</h1>
+            </Link>
+          )}
+          {user?.role !== "DELIVERY" && user?.role !== "User" && (
+            <Link>
+              <h1 className=" text-3xl font-bold my-8 text-white">Admin</h1>
+            </Link>
+          )}
           <div className="flex-1 relative">
             <div className="flex items-center relative">
-              <div className="absolute top-2 left-3">
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-              </div>
+              {user?.role !== "DELIVERY" && user?.role !== "ADMIN" && (
+                <Link>
+                  <div className="absolute top-2 left-3">
+                    <FontAwesomeIcon icon={faMagnifyingGlass} />
+                  </div>
+                </Link>
+              )}
             </div>
-            <label>
-              <input
-                className="m-1 py-[0.25rem] px-[2rem] rounded-full border border-gray-500"
-                type="text"
-                placeholder="Search..."
-                required
-                name="Search"
-                value={searchInput}
-                onChange={handleSearchInputChange}
-              />
-            </label>
+            {user?.role !== "DELIVERY" && user?.role !== "ADMIN" && (
+              <Link>
+                <label>
+                  <input
+                    className="m-1 py-[0.25rem] px-[2rem] rounded-full border border-gray-500"
+                    type="text"
+                    placeholder="Search..."
+                    required
+                    name="Search"
+                    value={searchInput}
+                    onChange={handleSearchInputChange}
+                  />
+                </label>
+              </Link>
+            )}
             {showDropdown && searchInput && (
               <div
                 ref={dropdownRef}
@@ -150,12 +174,12 @@ export default function Header() {
             )}
           </div>
           <div className="flex-none justify-end text-white">
-            <ul className="menu menu-horizontal px-2">
+            <ul className="menu menu-horizontal px-2 ">
               {finalNav.map((el) => (
                 <li key={el.to}>
                   <Link
                     to={el.to}
-                    className="text-white hover:text-gray-300 focus:text-gray-300"
+                    className="text-white hover:text-gray-300 focus:text-gray-300 "
                     style={{ color: el.visited ? "#ccc" : "white" }}
                   >
                     {el.text}
@@ -164,31 +188,39 @@ export default function Header() {
               ))}
               {user?.id && (
                 <li>
-                  <div className="relative" ref={userMenuRef}>
-                    <img src="img/user.png" width={20} alt="" />
+                  <div className="relative ms-2" ref={userMenuRef}>
+                    <img
+                      src="/img/user2.png"
+                      width={40}
+                      alt=""
+                      className="absolute"
+                    />
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="text-white hover:text-gray-300 focus:text-gray-300 flex items-center"
+                      className="text-white hover:text-gray-300 focus:text-gray-300 flex items-center ms-[2rem]"
                     >
                       {user.username}
                     </button>
                     {showUserMenu && (
-                      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-[#3e1e1e] text-white rounded-lg shadow-lg z-50 w-48 my-[-13rem]">
+                      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 bg-[#3e1e1e] text-white rounded-lg shadow-lg z-50 w-48 my-[-15rem]">
                         <Link
                           to="/profile"
                           className=" px-4 py-2 hover:bg-[#522929] flex flex-col justify-center items-center"
                         >
                           MyProfile
-                          <img src="img/user.png" width={60} alt="" />
+                          <img src="/img/user2.png" width={60} alt="" />
                           <p>{user.username}</p>
                           <p>{user.email}</p>
                         </Link>
-                        {user?.role !== "ADMIN" &&<Link
-                          to="/history"
-                          className="px-4 py-2 hover:bg-[#522929] flex flex-col justify-center items-center"
-                        >
-                          ประวัติการสั่งซื้อ
-                        </Link>}
+                        {user?.role !== "ADMIN" &&
+                          user?.role !== "DELIVERY" && (
+                            <Link
+                              to="/history"
+                              className="px-4 py-2 hover:bg-[#522929] flex flex-col justify-center items-center"
+                            >
+                              ประวัติการสั่งซื้อ
+                            </Link>
+                          )}
                         <button
                           onClick={hdlLogout}
                           className="w-full text-left px-4 py-2 hover:bg-[#522929] flex flex-col justify-center items-center"
@@ -206,10 +238,12 @@ export default function Header() {
                 to="/market"
                 className="text-white hover:text-gray-300 focus:text-gray-300"
               >
-                {user?.role !== "ADMIN" && (
+                {user?.role !== "ADMIN" && user?.role !== "DELIVERY" && (
                   <FontAwesomeIcon icon={faCartShopping} />
                 )}
-                {user?.role !== "ADMIN" && <span>{totalQuantity}</span>}
+                {user?.role !== "ADMIN" && user?.role !== "DELIVERY" && (
+                  <span>{totalQuantity}</span>
+                )}
               </Link>
             </div>
           </div>

@@ -15,14 +15,14 @@ export default function PageFound() {
     <div
       className="bg-cover h-screen flex items-center justify-center"
       style={{
-        backgroundImage: "url('bt3.png')",
+        backgroundImage:  "url(img/bt3.png)" ,
       }}
     >
       <div className="text-center">
         <div className=" flex flex-col justify-center items-center mr-1 top-5">
           <img
           className='flex flex-col justify-center items-center'
-            src="/fairytall/Bear.png"
+            src="./fairytall/Bear.png"
             width={200}
             alt="Logo" 
           />
