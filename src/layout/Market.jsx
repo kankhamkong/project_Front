@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import orderAuth from "../hooks/orderAuth";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
-
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 export default function Market() {
   const { cart, hdlDelete, updateCart } = cartAuth();
@@ -33,22 +33,31 @@ export default function Market() {
     groupCartItems();
   }, [cart]);
 
-  // console.log(cart)
-
   // Function to calculate total price
   const calculateTotalPrice = () => {
     return groupedCart.reduce((total, item) => total + item.book.price * item.quantity, 0);
   };
 
   // Function to increment quantity
-  const incrementQuantity = (id) => {
-    const filerCart = groupedCart.filter((item) => item.id === id);
-    const updatedCart = filerCart.find((item) => item.id === id).quantity+1; 
-    updateQuantity(id, updatedCart);
-  };
+const incrementQuantity = (id) => {
+  const filerCart = groupedCart.filter((item) => item.id === id);
+  const currentItem = filerCart.find((item) => item.id === id);
 
-  // console.log(groupedCart)
-  // console.log(updateCart)
+  if (currentItem) {
+    // Check if current quantity is less than the stock
+    if (currentItem.quantity < currentItem.book.stock) {
+      // Set quantity to max available stock
+      const updatedCart = currentItem.book.stock;
+      updateQuantity(id, updatedCart);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สามารถเพิ่มจำนวนได้",
+        text: "คุณได้เพิ่มหนังสือถึงจำนวนสูงสุดที่มีในสต็อกแล้ว!",
+      });
+    }
+  }
+};
 
   // Function to decrement quantity
   const decrementQuantity = async (id) => {
@@ -82,8 +91,8 @@ export default function Market() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      console.log(rs)
+      });
+      console.log(rs);
       if (rs.status === 200) {
         console.log("add to Order");
         navigate("/order");

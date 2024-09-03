@@ -61,7 +61,7 @@ export default function Books() {
 
   return (
     <div className="hero min-h-screen bg-[#592828]">
-      <div className="bg-slate-200 rounded shadow p-4">
+      <div className="bg-slate-200 rounded shadow p-4 mt-[7rem]">
         <a className="flex flex-col text-xl items-center">เพิ่มหนังสือ</a>
         <div className="flex flex-col items-left text-xl">
           <a>title </a>

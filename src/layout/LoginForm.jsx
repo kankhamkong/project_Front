@@ -32,6 +32,7 @@ export default function LoginForm() {
         headers: { Authorization: `Bearer ${rs.data.token}` },
       });
       console.log(rs1.data);
+      localStorage.setItem("userId", rs1.data.id)
       navigate('/')
       setUser(rs1.data);
       toast.success("Login สำเร็จ", {

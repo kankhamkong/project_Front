@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import paymentAuth from "../hooks/paymentAuth";
@@ -9,33 +9,54 @@ export default function HistoryUser() {
   const [refreshPayment, setRefreshPayment] = useState(false);
   const [refreshCart, setRefreshCart] = useState(false);
 
+  // window.location.reload();
+
   const handleCancelPayment = async (id) => {
     try {
       if (!id) {
         return alert("Invalid payment ID");
       }
 
-      console.log(id);
-      const paymentData = {
-        status: 2, // Set status to 2 for canceled payment
-        statusdelovery: 4, // Set statusdelovery to 4
-      };
-
-      // Call the cancelPayment function, passing in the payment data
-      await cancelPayment(paymentData, id);
-
-      // Show success message
-      Swal.fire({
-        title: "สำเร็จ!",
-        text: "ยกเลิกการชำระสินค้าเสร็จสิ้น",
-        icon: "success",
-        confirmButtonText: "ตกลง",
+      // Prompt user for cancellation reason
+      const { value: reason } = await Swal.fire({
+        title: "เหตุผลการยกเลิก",
+        input: "textarea",
+        inputLabel: "กรุณาใส่เหตุผลการยกเลิก",
+        inputPlaceholder: "เหตุผลการยกเลิกการชำระเงิน...",
+        inputAttributes: {
+          "aria-label": "เหตุผลการยกเลิก",
+        },
+        showCancelButton: true,
+        cancelButtonText: "ยกเลิก",
+        confirmButtonText: "ยืนยัน",
+        inputValidator: (value) => {
+          if (!value) {
+            return "กรุณาใส่เหตุผล";
+          }
+        },
       });
 
-      // Navigate to payment history page and refresh state
-      navigate("/history", { replace: true });
-      setRefreshPayment((prev) => !prev);
-      setRefreshCart((prev) => !prev);
+      // If the user did not cancel the prompt
+      if (reason !== undefined) {
+        const paymentData = {
+          status: 2, // Set status to 2 for canceled payment
+          statusdelovery: 4, // Set statusdelovery to 4
+          statusdescription: reason, // Add reason to the payment data
+        };
+
+        await cancelPayment(paymentData, id);
+
+        Swal.fire({
+          title: "สำเร็จ!",
+          text: "ยกเลิกการชำระสินค้าเสร็จสิ้น",
+          icon: "success",
+          confirmButtonText: "ตกลง",
+        });
+
+        navigate("/history", { replace: true });
+        setRefreshPayment((prev) => !prev);
+        setRefreshCart((prev) => !prev);
+      }
     } catch (error) {
       console.error("Cancellation failed", error);
       Swal.fire({
@@ -100,6 +121,9 @@ export default function HistoryUser() {
                     </p>
                     <p className="text-xl">จำนวน {pmt.totalQuantity} เล่ม</p>
                     <p className={`text-xl ${statusInfo.color}`}>สถานะ: {statusInfo.text}</p>
+                    {pmt.status === 2 && pmt.statusdescription && (
+                      <p className="text-xl text-red-500">เหตุผลที่ยกเลิก: {pmt.statusdescription}</p>
+                    )}
                     <p className="text-xl">
                       วันที่: {new Date(pmt.createdAt).toLocaleDateString()}
                     </p>
@@ -108,8 +132,12 @@ export default function HistoryUser() {
                       <h3 className="text-2xl font-semibold mt-4">
                         ที่อยู่จัดส่ง
                       </h3>
-                      <p className="text-xl ">ชื่อ-นามสกุล: {pmt.realname} {pmt.surname}</p>
-                      <p className="text-xl">ที่อยู่: {pmt.address}</p>
+                      <p className="text-xl">ชื่อ-นามสกุล: {pmt.addrss?.realname} {pmt.addrss?.surname}</p>
+                      <p className="text-xl">เบอร์โทร: {pmt.addrss?.phone}</p>
+                      <p className="text-xl">ที่อยู่: {pmt.addrss?.address}</p>
+                      <p className="text-xl">อำเภอ: {pmt.addrss?.district}</p>
+                      <p className="text-xl">จัดหวัด: {pmt.addrss?.province}</p>
+                      <p className="text-xl">รหัสไปรษณีย์: {pmt.addrss?.postcode}</p>
                       <p className={`text-xl ${deliveryStatusInfo.color}`}>สถานะการจัดส่ง: {deliveryStatusInfo.text}</p>
                       <h3 className="text-2xl font-semibold mt-4">
                         รายละเอียดหนังสือ:
@@ -121,7 +149,6 @@ export default function HistoryUser() {
                           key={index}
                           className="flex flex-row items-start ml-6 mt-4"
                         >
-                          {console.log(detail.order_id)}
                           <img
                             src={`${detail.book.image}`}
                             alt={detail.book.title}
@@ -141,7 +168,7 @@ export default function HistoryUser() {
                       <button
                         className="bg-[#F24444] w-[8rem] h-[3rem] rounded-full text-white disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => handleCancelPayment(pmt.id)}
-                        disabled={pmt.status !== 1 || pmt.statusdelovery > 0} // Disable if statusdelovery is 1, 2, or 3
+                        disabled={pmt.status !== 1 || pmt.statusdelovery > 0}
                       >
                         ยกเลิกการชำระ
                       </button>

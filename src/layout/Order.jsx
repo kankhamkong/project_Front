@@ -1,93 +1,74 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import orderAuth from "../hooks/orderAuth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import paymentAuth from "../hooks/paymentAuth";
-import { faCcMastercard } from "@fortawesome/free-brands-svg-icons/faCcMastercard";
-import { faBuildingColumns } from "@fortawesome/free-solid-svg-icons/faBuildingColumns";
-import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
-import { faCcVisa, faPaypal } from "@fortawesome/free-brands-svg-icons";
+import cartAuth from "../hooks/cartAuth";
+import addressAuth from "../hooks/addressAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCcMastercard, faCcVisa, faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { faBuildingColumns, faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import cartAuth from "../hooks/cartAuth";
+import axios from "axios";
 
 export default function Order() {
   const { order, orderDetail, setOrder, setOrderDetail } = orderAuth();
-  const { createPayment,  } = paymentAuth();
-  const [paymentMethod, setPaymentMethodState] = useState("");
-  const navigate = useNavigate();
-  const { setRefreshPayment } = paymentAuth();
+  const { createPayment, setRefreshPayment } = paymentAuth();
   const { setRefreshCart } = cartAuth();
+  const { addresses } = addressAuth(); // Get addresses from addressAuth
 
-  const [form, setForm] = useState({
-    realname: "",
-    surname: "",
-    houseNumber: "",
-    district: "",
-    province: "",
-    postalCode: "",
-  });
+  const [paymentMethod, setPaymentMethodState] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState({});
+  const navigate = useNavigate();
 
-  useEffect(() => {
-
-  }, [order]);
-
-  const totalQuantity = orderDetail.reduce(
-    (total, detail) => total + detail.quantity,
-    0
-  );
+  const totalQuantity = orderDetail.reduce((total, detail) => total + detail.quantity, 0);
 
   const handleSelectPaymentMethod = (event) => {
-    const selectedMethod = event.target.value;
-    setPaymentMethodState(selectedMethod);
+    setPaymentMethodState(event.target.value);
   };
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value,
-    }));
+  const handleAddressChange = (event) => {
+    const selectedAddr = addresses?.find(addr => addr.id == event.target.value);
+    setSelectedAddress(selectedAddr);
   };
 
   const handlePayment = async () => {
-    if (!paymentMethod) {
+    if (!paymentMethod || !selectedAddress) {
       Swal.fire({
-        title: "กรุณาเลือกวิธีการชำระเงิน",
-        text: "คุณต้องเลือกวิธีการชำระเงินก่อนทำรายการ",
+        title: "กรุณาเลือกวิธีการชำระเงินและที่อยู่",
+        text: "คุณต้องเลือกวิธีการชำระเงินและที่อยู่ก่อนทำรายการ",
         icon: "warning",
         confirmButtonText: "ตกลง",
       });
-      return;
+      return; // Add return to prevent further execution if not valid
     }
 
+    const userIds = localStorage.getItem('userId');
+    const paymentData = {
+      userId: userIds,
+      totalQuantity: totalQuantity,
+      orderId: order.id,
+      totalPrice: order.total_price,
+      method: paymentMethod,
+      addrssId: selectedAddress.id,
+      statusdescription: " ",
+    };
+    const token = localStorage.getItem('token');
+
     try {
-      const paymentData = {
-        totalQuantity: totalQuantity,
-        orderId: order.id,
-        totalAmount: order.total_price,
-        method: paymentMethod,
-        address: `${form.houseNumber}, ${form.district}, ${form.province} ${form.postalCode}`, // Concatenate the address fields
-        realname: form.realname,
-        surname: form.surname,
-      };
-      console.log(paymentData);
-      await createPayment(paymentData);
-      // Success message
+      await axios.post('http://localhost:8889/payment/payment', paymentData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
       Swal.fire({
         title: "สำเร็จ!",
         text: "การชำระเงินเสร็จสิ้น",
         icon: "success",
         confirmButtonText: "ตกลง",
       });
-      // Navigate to /history after successful payment
       navigate("/history");
-      setRefreshPayment((prev) => !prev);
-      setRefreshCart((prev) => !prev);
-      setOrder([]);
-      setOrderDetail([]);
+      window.location.reload();
     } catch (error) {
       console.error("Payment failed", error);
-      // Error message
       Swal.fire({
         title: "ล้มเหลว",
         text: "การชำระเงินล้มเหลว",
@@ -97,43 +78,7 @@ export default function Order() {
     }
   };
 
-  // const handleCancelPayment = async () => {
-  //   try {
-  //     const paymentData = {
-  //       totalQuantity: totalQuantity,
-  //       orderId: order.id,
-  //       totalAmount: order.total_price,
-  //       method: paymentMethod,
-  //       address: `${form.houseNumber}, ${form.district}, ${form.province} ${form.postalCode}`, // Concatenate the address fields
-  //       realname: form.realname,
-  //       surname: form.surname,
-  //     };
-      
-  //     await cancelPayment(paymentData);
-  //     // Success message
-  //     Swal.fire({
-  //       title: "สำเร็จ!",
-  //       text: "ยกเลิกการชำระสินค้าเสร็จสิ้น",
-  //       icon: "success",
-  //       confirmButtonText: "ตกลง",
-  //     });
-  //     // Navigate to /history after successful cancellation
-  //     navigate("/history");
-  //     setRefreshPayment((prev) => !prev);
-  //     setRefreshCart((prev) => !prev);
-  //   } catch (error) {
-  //     console.error("Cancellation failed", error);
-  //     // Error message
-  //     Swal.fire({
-  //       title: "ล้มเหลว",
-  //       text: "ยกเลิกการชำระสินค้าล้มเหลว",
-  //       icon: "error",
-  //       confirmButtonText: "ลองอีกครั้ง",
-  //     });
-  //   }
-  // };
-
-  const isFormValid = form.realname && form.surname && form.houseNumber && form.district && form.province && form.postalCode && paymentMethod;
+  const isFormValid = paymentMethod && selectedAddress;
 
   return (
     <div className="max-w-[100rem] bg-white flex justify-center items-center">
@@ -150,6 +95,7 @@ export default function Order() {
                 <div className="w-[25rem] bg-[#ffffff] border rounded-lg p-3">
                   <h1 className="text-2xl">เลือกวิธีการชำระเงิน</h1>
                   <div>
+                    {/* Payment Methods */}
                     <div className="flex gap-2 border-[1px] p-2 rounded-lg border-dark-blue mt-2">
                       <input
                         type="radio"
@@ -159,9 +105,7 @@ export default function Order() {
                       />
                       <span>
                         Bank Account{" "}
-                        <i className="fa-solid fa-building-columns">
-                          <FontAwesomeIcon icon={faBuildingColumns} />
-                        </i>
+                        <FontAwesomeIcon icon={faBuildingColumns} />
                       </span>
                     </div>
                     <div className="flex gap-2 border-[1px] p-2 rounded-lg border-dark-blue items-center">
@@ -173,15 +117,9 @@ export default function Order() {
                       />
                       <span>
                         Debit Card / Credit Card{" "}
-                        <i className="pr-1">
-                          <FontAwesomeIcon icon={faCcMastercard} />
-                        </i>
-                        <i className="pr-1">
-                          <FontAwesomeIcon icon={faCreditCard} />
-                        </i>
-                        <i className="pr-1">
-                          <FontAwesomeIcon icon={faCcVisa} />
-                        </i>
+                        <FontAwesomeIcon icon={faCcMastercard} className="pr-1" />
+                        <FontAwesomeIcon icon={faCreditCard} className="pr-1" />
+                        <FontAwesomeIcon icon={faCcVisa} className="pr-1" />
                       </span>
                     </div>
                     <div className="flex gap-2 border-[1px] p-2 rounded-lg border-dark-blue">
@@ -192,65 +130,40 @@ export default function Order() {
                         onChange={handleSelectPaymentMethod}
                       />
                       <span>
-                        PayPal{" "}
-                        <i className="">
-                          <FontAwesomeIcon icon={faPaypal} />
-                        </i>
+                        PayPal <FontAwesomeIcon icon={faPaypal} />
                       </span>
                     </div>
+                    {/* Address Selection */}
                     <div className="w-full flex flex-col mb-4">
-                      <h2 className="text-xl mb-2">ข้อมูลผู้ซื้อ</h2>
-                      <input
-                        type="text"
-                        name="realname"
-                        value={form.realname}
-                        onChange={handleInputChange}
-                        placeholder="ชื่อจริง"
+                      <h2 className="text-xl mb-2">เลือกที่อยู่</h2>
+                      <select
+                        name="address"
+                        value={selectedAddress?.id || ""}
+                        onChange={handleAddressChange}
                         className="border p-2 mb-2 rounded w-full"
-                      />
-                      <input
-                        type="text"
-                        name="surname"
-                        value={form.surname}
-                        onChange={handleInputChange}
-                        placeholder="นามสกุล"
-                        className="border p-2 mb-2 rounded w-full"
-                      />
-                      <input
-                        type="text"
-                        name="houseNumber"
-                        value={form.houseNumber}
-                        onChange={handleInputChange}
-                        placeholder="บ้านเลขที่"
-                        className="border p-2 mb-2 rounded w-full"
-                      />
-                      <input
-                        type="text"
-                        name="district"
-                        value={form.district}
-                        onChange={handleInputChange}
-                        placeholder="ตำบล/อำเภอ"
-                        className="border p-2 mb-2 rounded w-full"
-                      />
-                      <input
-                        type="text"
-                        name="province"
-                        value={form.province}
-                        onChange={handleInputChange}
-                        placeholder="จังหวัด"
-                        className="border p-2 mb-2 rounded w-full"
-                      />
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={form.postalCode}
-                        onChange={handleInputChange}
-                        placeholder="รหัสไปรษณีย์"
-                        className="border p-2 mb-2 rounded w-full"
-                      />
+                        required
+                      >
+                        <option value="">เลือกที่อยู่</option>
+                        {addresses.map((address) => (
+                          <option key={address.id} value={address.id}>
+                            {address.address}, {address.district}, {address.province} {address.postcode}
+                          </option>
+                        ))}
+                      </select>
+                      {/* Display Selected Address Details */}
+                      {selectedAddress.id && (
+                        <div className="border p-2 mt-2 rounded bg-gray-100">
+                          <p><strong>ชื่อ:</strong>{selectedAddress.realname}</p>นามสกุล:<p><strong></strong>{selectedAddress.surname}</p>
+                          <p><strong>ที่อยู่:</strong> {selectedAddress.address}</p>
+                          <p><strong>เขต:</strong> {selectedAddress.district}</p>
+                          <p><strong>จังหวัด:</strong> {selectedAddress.province}</p>
+                          <p><strong>รหัสไปรษณีย์:</strong> {selectedAddress.postcode}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
+                {/* Order Summary and Payment Button */}
                 <div className="flex flex-col gap-2 w-[25rem]">
                   <div className="border p-2 rounded-md bg-[#EDEDED]">
                     <div className="flex justify-between border-b border-black/20 pb-2 mb-3">
@@ -259,41 +172,23 @@ export default function Order() {
                     </div>
                     {orderDetail.map((detail, index) => (
                       <div key={index} className="flex justify-between px-2">
-                        <div className="flex justify-between">
-                          <p>
-                            {index + 1} {detail?.book?.title} เล่ม{" "}
-                            {detail?.book?.volume}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="">จำนวน {detail?.quantity} เล่ม</p>
-                        </div>
-                        <div>
-                          <p>{detail?.amount} THB</p>
-                        </div>
+                        <p>
+                          {index + 1}. {detail?.book?.title} เล่ม {detail?.book?.volume}
+                        </p>
+                        <p>จำนวน {detail?.quantity} เล่ม</p>
+                        <p>{detail?.amount} THB</p>
                       </div>
                     ))}
                   </div>
                   <div className="border p-2 rounded-md flex-col flex items-center justify-center gap-2">
                     <p>ยอดเงิน {order?.total_price} THB</p>
-                    <div className="w-full flex justify-center">
-                      <button
-                        className="bg-[#06ef15] w-1/2 py-1.5 rounded-full text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={handlePayment}
-                        disabled={order.length === 0 || !isFormValid}
-                      >
-                        ชำระเงิน
-                      </button>
-                    </div>
-                    {/* <div className="w-full flex justify-center">
-                      <button
-                        className="bg-[#F24444] w-1/2 py-1.5 rounded-full text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={handleCancelPayment}
-                        disabled={order.length === 0}
-                      >
-                        ยกเลิกการชำระ
-                      </button>
-                    </div> */}
+                    <button
+                      className="bg-[#06ef15] w-1/2 py-1.5 rounded-full text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={handlePayment}
+                      disabled={!isFormValid}
+                    >
+                      ชำระเงิน
+                    </button>
                   </div>
                 </div>
               </div>
